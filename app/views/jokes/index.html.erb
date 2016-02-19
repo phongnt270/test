@@ -1,0 +1,43 @@
+<% if @joke %>
+	<div id="joke">
+		<span id='joke-content'><%= simple_format(@joke.content.html_safe) %></span>
+		<div>
+			<button class="btn btn-info vote" action="up" joke_id='<%= @joke.id%>' bt_link="<%= root_path%>">This is funny!</button>
+			<button class="btn btn-success vote" action="down" joke_id='<%= @joke.id%>' bt_link="<%= root_path%>">This is not funny!</button>
+		</div>
+	</div>
+<% end %>
+<div id="empty_msg" <%= 'style=display:none;' if @joke%> >
+	<span>That's all the jokes for today! Come back another day!</span>
+</div>
+
+<script>
+$(function() {
+  $('.vote').bind('click', function() {
+    var action, joke_id, url;
+    joke_id = parseInt($(this).attr('joke_id'), 10);
+    action = $(this).attr('action');
+    url = $(this).attr('bt_link');
+    return $.ajax({
+      type: 'GET',
+      url: url,
+      data: {
+        joke_id: joke_id,
+        vote_action: action
+      },
+      dataType: 'json',
+      success: function(data) {
+      	if (data) {
+        	$('#joke-content').html(data.content.replace(/\n/g,'<br/>'));
+        	$('button[action="up"]').attr('joke_id',joke_id+1);
+        	$('button[action="down"]').attr('joke_id',joke_id+1);
+      	};
+      },
+      error: function(){
+      	$('#joke').hide();
+      	$('#empty_msg').show();
+      }
+    });
+  });
+});
+</script>
